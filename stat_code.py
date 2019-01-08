@@ -108,10 +108,13 @@ class RootStatistics(Model):
         self.subpath_data = {}
         self.count = {}
 
-    def path_depth(self, path):
-        replaced = path.replace(self.root, '')
-        c = Counter(replaced)
-        return c['\\'] + c['/'] + 1
+    def path_depth(self, path, files):
+        if any([i.endswith('.py') for i in files]):
+            replaced = path.replace(self.root, '')
+            c = Counter(replaced)
+            return c['\\'] + c['/'] + 1
+        else:
+            return 1
 
     def parse_current(self, curpath, files):
         for f in files:
@@ -140,6 +143,7 @@ class RootStatistics(Model):
 
         full_df = pd.DataFrame(df['index'].apply(lambda r: self.parse_index(r)).values.tolist(),
                                columns=full_cols)
+        print(self.max_k)
         # depth 不超过最大深度 max_k
         subpath_df = full_df.iloc[:, :-1].iloc[:, :self.max_k]
         subpath_df['file'] = full_df['file']
@@ -158,7 +162,7 @@ class RootStatistics(Model):
 
     def parse_root(self):
         for cur, dirs, files in os.walk(self.root, topdown=True):
-            depth = self.path_depth(cur)
+            depth = self.path_depth(cur, files)
             # get max k
             if depth > self.max_k:
                 self.max_k = depth
