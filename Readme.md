@@ -22,7 +22,9 @@ python stat_code.py -p . -k 5 --print
 
 # 输出结果
 
-`code_statistics.csv`
+具体结果在 `code_statistics.csv` 中。
+
+Github 上传后会自动将最后的空行删除，所以在 Github 上看到的行数与实际结果可能不匹配。
 
 添加 --print 参数后，下面是不同 depth 的输出结果， test 目录层数只有 3 层，其中 PATH 参数的目录记为第一层（root），在 -k 设为 5 后，仍只输出 3 层。
 
