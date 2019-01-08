@@ -24,7 +24,7 @@ python stat_code.py -p . -k 5 --print
 
 `code_statistics.csv`
 
-添加 --print 参数后，下面是不同 depth 的输出结果， test 目录层数只有 3 层，其中 PATH 参数的目录记为第一层（root），在 -k 设为 5 后，仍rj只输出 3 层。
+添加 --print 参数后，下面是不同 depth 的输出结果， test 目录层数只有 3 层，其中 PATH 参数的目录记为第一层（root），在 -k 设为 5 后，仍只输出 3 层。
 
 ![mark](http://qnpic.sijihaiyang.top/blog/20190109/C5FI0TlA2d4N.png?imageslim)
 
