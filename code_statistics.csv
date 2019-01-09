@@ -1,2 +1,5 @@
-root,file,index,code,comments,docstring,none,total
-C:\Data\Github\Other\StatCodeLines,stat_code.py,C:\Data\Github\Other\StatCodeLines\stat_code.py,163,14,0,35,212
+root,subpath_2,subpath_3,file,index,code,comments,docstring,none,total
+C:\Data\Github\Other\StatCodeLines,,,stat_code.py,C:\Data\Github\Other\StatCodeLines\stat_code.py,164,15,0,36,215
+C:\Data\Github\Other\StatCodeLines,test,,allmaps.py,C:\Data\Github\Other\StatCodeLines\test\allmaps.py,7,2,18,14,41
+C:\Data\Github\Other\StatCodeLines,test,,setup_helper.py,C:\Data\Github\Other\StatCodeLines\test\setup_helper.py,49,3,14,14,80
+C:\Data\Github\Other\StatCodeLines,test,test2,test2.py,C:\Data\Github\Other\StatCodeLines\test\test2\test2.py,0,0,0,0,0

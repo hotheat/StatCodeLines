@@ -5,6 +5,9 @@ import pandas as pd
 import numpy as np
 from prettytable import PrettyTable
 import argparse
+from colorama import Fore, init, Style
+
+init(autoreset=True)
 
 
 def check_path(path):
@@ -143,7 +146,6 @@ class RootStatistics(Model):
 
         full_df = pd.DataFrame(df['index'].apply(lambda r: self.parse_index(r)).values.tolist(),
                                columns=full_cols)
-        print(self.max_k)
         # depth 不超过最大深度 max_k
         subpath_df = full_df.iloc[:, :-1].iloc[:, :self.max_k]
         subpath_df['file'] = full_df['file']
@@ -157,7 +159,8 @@ class RootStatistics(Model):
         df = df.sort_values(by='total', ascending=False)[:10]
         table = PrettyTable()
         for col in df.columns:
-            table.add_column(col, list(df[col]))
+            # RESET_ALL 还原至初始设置
+            table.add_column(Fore.CYAN + col, [Style.RESET_ALL + str(i) for i in df[col]])
         print(table, flush=True)
 
     def parse_root(self):
