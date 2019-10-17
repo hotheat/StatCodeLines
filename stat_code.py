@@ -29,27 +29,27 @@ class FilesStatistics(Model):
         self.comments = 0
         self.none = 0
         self.code = 0
-        self.in_multilines = False  # 是否在多行字符串中
+        self.multilines_mode = False  # 是否在多行字符串中
         self.checked = True  # 是否已经遍历过该行
 
-    def stat_comments(self, line):
-        if not self.in_multilines and line.startswith('#'):
+    def comments_add(self, line):
+        if not self.multilines_mode and line.startswith('#'):
             self.comments += 1
             self.checked = True
 
-    def stat_docstring_oneline(self, line):
+    def docstring_in_oneline(self, line):
         # docstring 在同一行
-        if not self.in_multilines and (re.match(r'^("{3}|\'{3}).+("{3}|\'{3})$', line) or
-                                       re.match(r'^("{1}|\'{1})[^(\'|").]+("{1}|\'{1})$', line)):
+        if not self.multilines_mode and (re.match(r'^("{3}|\'{3}).+("{3}|\'{3})$', line) or
+                                         re.match(r'^("{1}|\'{1})[^(\'|").]+("{1}|\'{1})$', line)):
             self.docstring += 1
             self.checked = True
 
-    def stat_none(self, line):
-        if not self.in_multilines and line == '':
+    def none_add(self, line):
+        if not self.multilines_mode and line == '':
             self.none += 1
             self.checked = True
 
-    def stat_total(self, ):
+    def total_add(self, ):
         self.total += 1
 
     def check_last_line(self, line):
@@ -62,23 +62,23 @@ class FilesStatistics(Model):
         with open(self.file, encoding='utf-8') as f:
             for l in f:
                 line, self.checked = l.strip(), False
-                self.stat_total()
-                self.stat_comments(line)
-                self.stat_docstring_oneline(line)
-                self.stat_none(line)
+                self.total_add()
+                self.comments_add(line)
+                self.docstring_in_oneline(line)
+                self.none_add(line)
 
                 # 多行字符串开始
-                if not self.checked and not self.in_multilines and (re.match(r'(^"{3}\w*|^\'{3}\w*)', line)):
+                if not self.checked and not self.multilines_mode and (re.match(r'(^"{3}\w*|^\'{3}\w*)', line)):
                     self.docstring += 1
-                    self.in_multilines = True
+                    self.multilines_mode = True
                     self.checked = True
                 # 多行字符串结束
-                elif self.in_multilines and (re.match(r'(\w*"""$|\w*\'\'\'$)', line)):
+                elif self.multilines_mode and (re.match(r'(\w*"""$|\w*\'\'\'$)', line)):
                     self.docstring += 1
-                    self.in_multilines = False
+                    self.multilines_mode = False
                     self.checked = True
                 # 多行字符串
-                elif self.in_multilines:
+                elif self.multilines_mode:
                     self.docstring += 1
                     self.checked = True
                 # code 行
@@ -102,11 +102,12 @@ class FilesStatistics(Model):
 
 
 class RootStatistics(Model):
-    def __init__(self, root, depth, _print):
-        self.root = os.path.abspath(root)
+    def __init__(self, args):
+        self.root = os.path.abspath(args.path)
         check_path(self.root)
-        self.depth = depth
-        self._print = _print
+        self.depth = args.k
+        self._print = args.print
+        self.excludes = [] if args.excludes is None else args.excludes
         self.max_k = 0
         self.subpath_data = {}
         self.count = {}
@@ -120,8 +121,9 @@ class RootStatistics(Model):
             return 1
 
     def parse_current(self, curpath, files):
+        contained = any([i in curpath for i in self.excludes])
         for f in files:
-            if f.endswith('.py'):
+            if f.endswith('.py') and not contained:
                 file = os.path.join(curpath, f)
                 fs = FilesStatistics(file)
                 fs.parse_file()
@@ -151,6 +153,8 @@ class RootStatistics(Model):
         subpath_df['file'] = full_df['file']
         subpath_df.replace(0, np.nan, inplace=True)
         df = pd.concat([subpath_df, df], axis=1)
+        print('非空代码行数: ', df['code'].sum())
+        print('总行数: ', df['total'].sum())
         df.to_csv('code_statistics.csv', index=False)
 
     def print_df(self):
@@ -164,14 +168,14 @@ class RootStatistics(Model):
         print(table, flush=True)
 
     def parse_root(self):
-        for cur, dirs, files in os.walk(self.root, topdown=True):
-            depth = self.path_depth(cur, files)
+        for root, dirs, files in os.walk(self.root, topdown=True):
+            depth = self.path_depth(root, files)
             # get max k
             if depth > self.max_k:
                 self.max_k = depth
 
             if depth <= self.depth:
-                self.parse_current(cur, files)
+                self.parse_current(root, files)
 
         self.to_dataframe()
         if self._print:
@@ -185,8 +189,9 @@ def arguements():
     )
     parser.add_argument('-p', "--path", help="the input path", required=True)
     parser.add_argument("-k", help="the max depth in the path. If exceed the max depth, it will be ignored.",
-                        type=int, default=3)
+                        type=int, default=10)
     parser.add_argument("--print", help="print the 10 largest results sorted by total rows.", action='store_true')
+    parser.add_argument("--excludes", help="excludes folders", nargs='*')
 
     args = parser.parse_args()
     return args
@@ -194,7 +199,7 @@ def arguements():
 
 def main():
     args = arguements()
-    cs = RootStatistics(args.path, args.k, args.print)
+    cs = RootStatistics(args)
     cs.parse_root()
 
 

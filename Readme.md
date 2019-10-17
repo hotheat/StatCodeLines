@@ -4,6 +4,7 @@
 
 ```python
 usage: stat_code.py [-h] -p PATH [-k K] [--print]
+                    [--excludes [EXCLUDES [EXCLUDES ...]]]
 
 Statistics for .py file from the path
 
@@ -11,9 +12,11 @@ optional arguments:
   -h, --help            show this help message and exit
   -p PATH, --path PATH  the input path (default: None)
   -k K                  the max depth in the path. If exceed the max depth, it
-                        will be ignored (default: 3)
+                        will be ignored. (default: 10)
   --print               print the 10 largest results sorted by total rows.
                         (default: False)
+  --excludes [EXCLUDES [EXCLUDES ...]]
+                        excludes folders (default: None)
 ```
 
 ```
@@ -28,7 +31,7 @@ Github 上传后会自动将最后的空行删除，所以在 Github 上看到�
 
 添加 --print 参数后，下面是不同 depth 的输出结果， test 目录层数只有 3 层，其中 PATH 参数的目录记为第一层（root），在 -k 设为 5 后，仍只输出 3 层。
 
-![mark](http://qnpic.sijihaiyang.top/blog/20190109/oM3ra0rxjxPv.png?imageslim)
+![](http://qnpic.sijihaiyang.top/img/20191017182504.png)
 
 # Docstring 的判定
 
